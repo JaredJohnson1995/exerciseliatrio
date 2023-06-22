@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-check-service
+  namespace: health-check
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: modules-latest
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: modules-latest-deployment
+  namespace: health-check
+  labels:
+    app: modules-latest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: modules-latest
+  template:
+    metadata:
+      labels:
+        app: modules-latest
+    spec:
+      containers:
+      - name: modules-latest-container
+        image: public.ecr.aws/n0t1x9q8/modules:latest
+        imagePullPolicy: Always
+        ports:
+          - name: web
+            containerPort: 8000
+      imagePullSecrets:
+          - name: regcred
